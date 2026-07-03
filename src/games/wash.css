@@ -1,0 +1,300 @@
+.wash-game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, #b2ebf2 0%, #80deea 55%, #4dd0e1 100%);
+  touch-action: manipulation;
+}
+
+/* Sudsy water at the bottom */
+.wash-water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 16%;
+  background: linear-gradient(180deg, #e0f7fa, #b3e5fc);
+  border-radius: 50% 50% 0 0 / 36px 36px 0 0;
+  box-shadow: 0 -6px 20px rgba(0, 90, 120, 0.15);
+}
+
+.wash-water::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 6%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    48px 6px 0 -6px rgba(255, 255, 255, 0.8),
+    130px -2px 0 -3px rgba(255, 255, 255, 0.9),
+    220px 8px 0 -8px rgba(255, 255, 255, 0.75),
+    290px 0px 0 -4px rgba(255, 255, 255, 0.85);
+}
+
+.wash-header {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.wash-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 90, 120, 0.4);
+}
+
+.wash-counter {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 90, 120, 0.28);
+  padding: 3px 14px;
+  border-radius: 999px;
+}
+
+/* Stage */
+.wash-stage {
+  position: relative;
+  z-index: 4;
+  width: min(88vw, 370px);
+  aspect-ratio: 1;
+  margin: auto 0;
+}
+
+.wash-dino {
+  width: 100%;
+  height: 100%;
+}
+
+.wash-dino-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 10px rgba(0, 70, 90, 0.25));
+}
+
+.phase-washing .wash-dino {
+  animation: washBreathe 3.2s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes washBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+
+/* Wet-dog shake */
+.phase-shake .wash-dino {
+  animation: dogShake 0.75s ease-in-out;
+  transform-origin: 50% 85%;
+}
+
+@keyframes dogShake {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-9deg); }
+  30% { transform: rotate(8deg); }
+  45% { transform: rotate(-7deg); }
+  60% { transform: rotate(6deg); }
+  75% { transform: rotate(-4deg); }
+  90% { transform: rotate(2deg); }
+}
+
+/* Clean bob */
+.phase-clean .wash-dino {
+  animation: dinoBob 3s ease-in-out infinite;
+}
+
+/* Mud spots */
+.mud-spot {
+  position: absolute;
+  cursor: pointer;
+  z-index: 6;
+  touch-action: manipulation;
+  animation: mudPlop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes mudPlop {
+  from { scale: 0.3; opacity: 0; }
+  to { scale: 1; opacity: 1; }
+}
+
+.mud-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 2px rgba(60, 30, 0, 0.3));
+}
+
+/* Foam burst where a spot was scrubbed */
+.foam {
+  position: absolute;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.foam-sponge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 30px;
+  transform: translate(-50%, -50%);
+  animation: spongeScrub 0.6s ease-in-out forwards;
+}
+
+@keyframes spongeScrub {
+  0% { transform: translate(-50%, -50%) rotate(0) scale(0.6); opacity: 1; }
+  30% { transform: translate(-65%, -55%) rotate(-18deg) scale(1.1); }
+  60% { transform: translate(-35%, -45%) rotate(14deg) scale(1.05); }
+  100% { transform: translate(-50%, -50%) rotate(0) scale(0.8); opacity: 0; }
+}
+
+.foam-bubble {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #fff, rgba(255, 255, 255, 0.55));
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  animation: foamFly 0.7s ease-out forwards;
+}
+
+@keyframes foamFly {
+  0% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(4px) scale(0.6); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(46px) scale(1.1); opacity: 0; }
+}
+
+/* Water drops during the shake */
+.shake-drops {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.shake-drop {
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  border-radius: 50% 50% 60% 60% / 40% 40% 60% 60%;
+  background: linear-gradient(180deg, #81d4fa, #29b6f6);
+  animation: dropFly 0.7s ease-out forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes dropFly {
+  0% { transform: rotate(var(--angle)) translateX(30px) scale(0.7); opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateX(120px) scale(1); opacity: 0; }
+}
+
+/* Clean celebration */
+.clean-sparkles {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+
+.clean-sparkle {
+  position: absolute;
+  font-size: 26px;
+  animation: sparkleTwinkle 1.4s ease-in-out infinite;
+}
+
+.cs1 { left: 12%; top: 22%; }
+.cs2 { right: 10%; top: 34%; animation-delay: 0.35s; }
+.cs3 { left: 20%; top: 62%; animation-delay: 0.7s; font-size: 20px; }
+.cs4 { right: 22%; top: 70%; animation-delay: 1.05s; font-size: 22px; }
+
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.clean-bubble {
+  position: absolute;
+  top: -38px;
+  right: 2%;
+  background: #fff;
+  border-radius: 18px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 20px;
+  color: #00838f;
+  box-shadow: 0 4px 12px rgba(0, 90, 120, 0.25);
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 8;
+  white-space: nowrap;
+}
+
+/* Footer */
+.wash-footer {
+  position: relative;
+  z-index: 5;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.wash-hint {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 90, 120, 0.4);
+  animation: hintPulse 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+.play-again.wash-again {
+  margin-top: 0;
+  padding: 14px 36px;
+  font-size: 19px;
+  min-height: 56px;
+  background: linear-gradient(180deg, #4dd0e1, #00acc1 60%, #00838f);
+  text-shadow: 0 1px 3px rgba(0, 60, 70, 0.35);
+}
+
+/* Tablet / iPad */
+@media (min-width: 700px) and (min-height: 600px) {
+  .wash-title {
+    font-size: 30px;
+  }
+
+  .wash-counter {
+    font-size: 15px;
+  }
+
+  .wash-stage {
+    width: min(60vw, 490px);
+  }
+
+  .wash-hint {
+    font-size: 19px;
+  }
+
+  .clean-bubble {
+    font-size: 26px;
+    padding: 10px 20px;
+    top: -46px;
+  }
+
+  .foam-sponge {
+    font-size: 40px;
+  }
+}

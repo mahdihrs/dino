@@ -1,0 +1,297 @@
+.bubble-game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #64bdf5 0%, #a5dbfb 55%, #d8f1ff 100%);
+  touch-action: manipulation;
+}
+
+.bp-sun {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff59d, #ffd54f);
+  box-shadow: 0 0 34px rgba(255, 213, 79, 0.75);
+}
+
+.bp-cloud {
+  position: absolute;
+  background: #fff;
+  opacity: 0.85;
+  border-radius: 999px;
+}
+
+.bp-cloud::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: -13px;
+  width: 36px;
+  height: 28px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.bp-cloud::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: -9px;
+  width: 26px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.bp-cloud-1 {
+  top: 84px;
+  left: 8%;
+  width: 92px;
+  height: 26px;
+  animation: bpDrift 30s ease-in-out infinite alternate;
+}
+
+.bp-cloud-2 {
+  top: 150px;
+  right: 14%;
+  width: 70px;
+  height: 22px;
+  animation: bpDrift 24s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes bpDrift {
+  from { transform: translateX(-22px); }
+  to { transform: translateX(22px); }
+}
+
+.bubble-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 11%;
+  background: linear-gradient(180deg, #8bc34a, #558b2f);
+  border-radius: 50% 50% 0 0 / 30px 30px 0 0;
+  box-shadow: 0 -8px 24px rgba(20, 60, 0, 0.18);
+}
+
+.bubble-header {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.bubble-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 60, 120, 0.4);
+}
+
+.bubble-counter {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 80, 150, 0.28);
+  padding: 3px 14px;
+  border-radius: 999px;
+}
+
+/* Rising bubble */
+.bubble-rise {
+  position: absolute;
+  bottom: -180px;
+  cursor: pointer;
+  z-index: 3;
+  animation: bubbleRise linear forwards;
+  touch-action: manipulation;
+}
+
+@keyframes bubbleRise {
+  from { transform: translateY(0); }
+  to { transform: translateY(-118vh); }
+}
+
+.bubble-sway {
+  width: 100%;
+  height: 100%;
+  animation: bubbleSway ease-in-out infinite alternate;
+}
+
+@keyframes bubbleSway {
+  from { transform: translateX(-10px); }
+  to { transform: translateX(10px); }
+}
+
+.bubble-skin {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 32% 28%,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.25) 18%,
+    rgba(255, 255, 255, 0.06) 42%,
+    rgba(255, 255, 255, 0.03) 62%,
+    rgba(255, 255, 255, 0.22) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset -6px -8px 18px rgba(120, 180, 255, 0.28),
+    0 4px 12px rgba(30, 90, 160, 0.12);
+}
+
+.bubble-dino {
+  width: 68%;
+  height: 68%;
+}
+
+/* Pop burst */
+.bubble-burst {
+  position: fixed;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.burst-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--bsize);
+  height: var(--bsize);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  animation: burstRing 0.45s ease-out forwards;
+}
+
+@keyframes burstRing {
+  from { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+  to { transform: translate(-50%, -50%) scale(1.35); opacity: 0; }
+}
+
+.burst-drop {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  animation: burstDrop 0.5s ease-out forwards;
+}
+
+@keyframes burstDrop {
+  from { transform: rotate(var(--angle)) translateX(8px) scale(1); opacity: 1; }
+  to { transform: rotate(var(--angle)) translateX(58px) scale(0.2); opacity: 0; }
+}
+
+/* Landed dino */
+.landed {
+  position: absolute;
+  bottom: 6.5%;
+  width: 64px;
+  height: 64px;
+  z-index: 2;
+  animation: pace 6s ease-in-out 1s infinite alternate;
+}
+
+@keyframes pace {
+  from { margin-left: -14px; }
+  to { margin-left: 14px; }
+}
+
+.landed-fall {
+  width: 100%;
+  height: 100%;
+  animation: fallDown 0.85s cubic-bezier(0.3, 0.5, 0.5, 1) forwards;
+}
+
+@keyframes fallDown {
+  0% { transform: translateY(calc(-1 * var(--fall-dist))); }
+  68% { transform: translateY(0); }
+  83% { transform: translateY(-16px); }
+  100% { transform: translateY(0); }
+}
+
+.landed-waddle {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  animation: waddle 0.9s ease-in-out 1s infinite;
+  transform-origin: 50% 90%;
+  touch-action: manipulation;
+}
+
+@keyframes waddle {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+
+.landed-hop {
+  width: 100%;
+  height: 100%;
+}
+
+.landed-hop.hopping {
+  animation: hopUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes hopUp {
+  0%, 100% { transform: translateY(0); }
+  45% { transform: translateY(-24px); }
+}
+
+.landed-flip {
+  width: 100%;
+  height: 100%;
+}
+
+.landed-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 3px rgba(20, 60, 0, 0.3));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-sway,
+  .landed-waddle,
+  .landed,
+  .bp-cloud {
+    animation-play-state: paused;
+  }
+}
+
+/* Tablet / iPad */
+@media (min-width: 700px) and (min-height: 600px) {
+  .bubble-title {
+    font-size: 30px;
+  }
+
+  .bubble-counter {
+    font-size: 15px;
+  }
+
+  .landed {
+    width: 88px;
+    height: 88px;
+  }
+
+  .bp-sun {
+    width: 86px;
+    height: 86px;
+    top: 28px;
+    right: 34px;
+  }
+
+  .bp-cloud-1 { width: 120px; height: 34px; }
+  .bp-cloud-2 { width: 96px; height: 30px; }
+}

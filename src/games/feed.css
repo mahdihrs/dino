@@ -1,0 +1,314 @@
+.feed-game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(180deg, #ffe9a8 0%, #ffd27f 55%, #ffb26b 100%);
+  touch-action: manipulation;
+}
+
+.feed-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38%;
+  background: linear-gradient(180deg, #9ccc65, #689f38);
+  border-radius: 50% 50% 0 0 / 70px 70px 0 0;
+  box-shadow: 0 -10px 30px rgba(60, 90, 0, 0.15);
+}
+
+.feed-header {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.feed-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(150, 70, 0, 0.4);
+}
+
+.feed-counter {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(150, 70, 0, 0.28);
+  padding: 3px 14px;
+  border-radius: 999px;
+}
+
+/* Dino stage */
+.dino-stage {
+  position: relative;
+  z-index: 4;
+  width: min(80vw, 330px);
+  margin-top: auto;
+}
+
+.big-dino-svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 8px 10px rgba(60, 40, 0, 0.25));
+  animation: feedBreathe 3.2s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes feedBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.012); }
+}
+
+/* Belly grows */
+.belly {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Jaw */
+.jaw {
+  transform-box: view-box;
+  transform-origin: 148px 104px;
+  transition: transform 0.18s ease;
+}
+
+.phase-fly .jaw,
+.phase-burp .jaw,
+.phase-yuck .jaw {
+  transform: rotate(17deg);
+}
+
+.phase-chomp .jaw {
+  animation: chew 0.24s ease-in-out 3;
+}
+
+@keyframes chew {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(15deg); }
+}
+
+/* Tongue — yuck only */
+.tongue {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.phase-yuck .tongue {
+  opacity: 1;
+}
+
+/* Eyes */
+.eye-happy { opacity: 0; }
+.phase-yum .eye-happy, .phase-burp .eye-happy { opacity: 1; }
+.phase-yum .eye-open, .phase-burp .eye-open { opacity: 0; }
+
+/* Blush */
+.blush { opacity: 0; transition: opacity 0.2s; }
+.phase-yum .blush { opacity: 1; }
+
+/* Reactions */
+.phase-yum .big-dino-svg {
+  animation: happyBounce 0.5s ease-in-out 2;
+}
+
+@keyframes happyBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.head {
+  transform-box: view-box;
+  transform-origin: 150px 92px;
+}
+
+.phase-yuck .head {
+  animation: headShake 0.75s ease-in-out;
+}
+
+@keyframes headShake {
+  0%, 100% { transform: rotate(0); }
+  20% { transform: rotate(-7deg); }
+  40% { transform: rotate(6deg); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(3deg); }
+}
+
+.phase-burp .big-dino-svg {
+  animation: bellyWobble 0.55s ease-in-out 2;
+}
+
+@keyframes bellyWobble {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.06, 0.95); }
+}
+
+/* Reaction bubbles */
+.reaction-bubble {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 20px;
+  color: #37474f;
+  box-shadow: 0 4px 12px rgba(90, 40, 0, 0.25);
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 6;
+  white-space: nowrap;
+}
+
+.burp-bubble {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Hearts */
+.hearts {
+  position: absolute;
+  top: 8%;
+  left: 30%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.heart {
+  position: absolute;
+  font-size: 24px;
+  animation: floatHeart 1s ease-out forwards;
+}
+
+.heart.h1 { left: 0; }
+.heart.h2 { left: 34px; animation-delay: 0.12s; }
+.heart.h3 { left: -30px; animation-delay: 0.24s; }
+
+@keyframes floatHeart {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(-56px) scale(1.15); opacity: 0; }
+}
+
+/* Food tray */
+.food-tray {
+  position: relative;
+  z-index: 5;
+  margin-top: 10px;
+  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: min(92vw, 380px);
+  padding: 0 8px;
+}
+
+.food-btn {
+  aspect-ratio: 1.15;
+  background: rgba(255, 255, 255, 0.82);
+  border: none;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    0 4px 10px rgba(80, 40, 0, 0.18),
+    inset 0 2px 2px rgba(255, 255, 255, 0.8);
+  transition: transform 0.1s ease, opacity 0.2s;
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+.food-btn:active {
+  transform: scale(0.92);
+}
+
+.food-btn:disabled {
+  opacity: 0.6;
+}
+
+.food-btn svg {
+  width: 62%;
+  height: 62%;
+}
+
+/* Flying food */
+.fly-food {
+  position: fixed;
+  z-index: 8;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  margin-top: -26px;
+  pointer-events: none;
+  animation: flyFood 0.62s cubic-bezier(0.4, 0.1, 0.7, 1) forwards;
+}
+
+.fly-food svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes flyFood {
+  0% { transform: translate(0, 0) scale(1) rotate(0); }
+  55% { transform: translate(calc(var(--dx) * 0.55), calc(var(--dy) * 0.55 - 70px)) scale(0.85) rotate(20deg); }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(50deg); }
+}
+
+/* Tablet / iPad */
+@media (min-width: 700px) and (min-height: 600px) {
+  .feed-title {
+    font-size: 30px;
+  }
+
+  .feed-counter {
+    font-size: 15px;
+  }
+
+  .dino-stage {
+    width: min(52vw, 450px);
+  }
+
+  .food-tray {
+    width: min(72vw, 520px);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+
+  .fly-food {
+    width: 68px;
+    height: 68px;
+    margin-left: -34px;
+    margin-top: -34px;
+  }
+
+  .reaction-bubble {
+    font-size: 26px;
+    padding: 10px 20px;
+  }
+}
+
+/* Landscape tablets — single-row tray, dino sized against height */
+@media (min-width: 900px) and (max-height: 820px) {
+  .food-tray {
+    grid-template-columns: repeat(6, 1fr);
+    width: min(88vw, 720px);
+  }
+
+  .dino-stage {
+    width: min(44vh, 400px);
+  }
+}
