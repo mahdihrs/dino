@@ -156,11 +156,27 @@ const LEVEL_INFO = [
 ];
 
 export default function DinoRun({ onHome }) {
-  const [phase, setPhase] = useState('select'); // select | level | play | win
+  const [phase, setPhase] = useState('select'); // select | level | controls | voice-setup | play | win
   const [dino, setDino] = useState(DINOS[0]);
   const [level, setLevel] = useState(1);
+  const [controlMode, setControlMode] = useState('tap');
+  const [voiceStatus, setVoiceStatus] = useState('idle');
   const worldRef = useRef(null);
+  const phaseRef = useRef(phase);
+  const controlModeRef = useRef(controlMode);
+  const recognitionRef = useRef(null);
+  const keepListeningRef = useRef(false);
+  const voiceRestartRef = useRef(null);
+  const voiceStatusTimerRef = useRef(null);
+  const lastVoiceJumpRef = useRef(0);
+  const lastVoiceResultRef = useRef(-1);
   const [, force] = useReducer(c => c + 1, 0);
+  const SpeechRecognition = typeof window !== 'undefined'
+    ? window.SpeechRecognition || window.webkitSpeechRecognition
+    : null;
+
+  phaseRef.current = phase;
+  controlModeRef.current = controlMode;
 
   useEffect(() => {
     if (phase !== 'play') return;
@@ -171,6 +187,7 @@ export default function DinoRun({ onHome }) {
       const w = worldRef.current;
       if (w.winHandled) return;
       w.winHandled = true;
+      stopVoice();
       playVictory();
       winTimer = setTimeout(() => setPhase('win'), 700);
     };
@@ -219,6 +236,8 @@ export default function DinoRun({ onHome }) {
     };
   }, [phase]);
 
+  useEffect(() => () => stopVoice(), []);
+
   function start(d) {
     ensureAudio().catch(() => {});
     playChirp();
@@ -230,18 +249,149 @@ export default function DinoRun({ onHome }) {
     ensureAudio().catch(() => {});
     playChirp();
     setLevel(n);
-    worldRef.current = makeWorld(makeLevel(n));
+    worldRef.current = null;
+    setPhase('controls');
+  }
+
+  function beginGame(mode) {
+    ensureAudio().catch(() => {});
+    playChirp();
+    stopVoice();
+    setControlMode(mode);
+    controlModeRef.current = mode;
+
+    if (mode === 'voice') {
+      worldRef.current = null;
+      phaseRef.current = 'voice-setup';
+      setPhase('voice-setup');
+      startVoice();
+      return;
+    }
+
+    worldRef.current = makeWorld(makeLevel(level));
+    phaseRef.current = 'play';
     setPhase('play');
   }
 
   function jump() {
     ensureAudio().catch(() => {});
     const w = worldRef.current;
-    if (phase === 'play' && w && w.onGround && !w.finished) {
+    if (phaseRef.current === 'play' && w && w.onGround && !w.finished) {
       w.onGround = false;
       w.vy = JUMP_V;
       playJump();
     }
+  }
+
+  function stopVoice() {
+    keepListeningRef.current = false;
+    clearTimeout(voiceRestartRef.current);
+    clearTimeout(voiceStatusTimerRef.current);
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      recognition.onend = null;
+      try { recognition.abort(); } catch { /* recognition already stopped */ }
+    }
+  }
+
+  function startVoice() {
+    if (!SpeechRecognition) {
+      setVoiceStatus('unavailable');
+      return;
+    }
+
+    let recognition;
+    try {
+      recognition = new SpeechRecognition();
+    } catch {
+      setVoiceStatus('unavailable');
+      return;
+    }
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognitionRef.current = recognition;
+    keepListeningRef.current = true;
+    setVoiceStatus('starting');
+
+    recognition.onstart = () => {
+      if (!keepListeningRef.current) return;
+      lastVoiceResultRef.current = -1;
+      setVoiceStatus('listening');
+      if (phaseRef.current === 'voice-setup') {
+        worldRef.current = makeWorld(makeLevel(level));
+        phaseRef.current = 'play';
+        setPhase('play');
+      }
+    };
+    recognition.onresult = (event) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const command = event.results[i][0]?.transcript?.toLowerCase() || '';
+        const now = performance.now();
+        if (
+          /\bjump\b/.test(command)
+          && i !== lastVoiceResultRef.current
+          && now - lastVoiceJumpRef.current > 500
+        ) {
+          lastVoiceResultRef.current = i;
+          lastVoiceJumpRef.current = now;
+          jump();
+          setVoiceStatus('heard');
+          clearTimeout(voiceStatusTimerRef.current);
+          voiceStatusTimerRef.current = setTimeout(() => {
+            if (keepListeningRef.current) setVoiceStatus('listening');
+          }, 650);
+          break;
+        }
+      }
+    };
+    recognition.onerror = (event) => {
+      if (event.error === 'aborted') return;
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        keepListeningRef.current = false;
+        setVoiceStatus('blocked');
+        return;
+      }
+      if (event.error === 'audio-capture') {
+        keepListeningRef.current = false;
+        setVoiceStatus('no-mic');
+        return;
+      }
+      setVoiceStatus('reconnecting');
+    };
+    recognition.onend = () => {
+      if (!keepListeningRef.current || phaseRef.current !== 'play' || controlModeRef.current !== 'voice') return;
+      setVoiceStatus('reconnecting');
+      voiceRestartRef.current = setTimeout(() => {
+        if (!keepListeningRef.current) return;
+        try {
+          recognition.start();
+        } catch {
+          keepListeningRef.current = false;
+          setVoiceStatus('blocked');
+        }
+      }, 500);
+    };
+
+    try {
+      recognition.start();
+    } catch {
+      keepListeningRef.current = false;
+      setVoiceStatus('blocked');
+    }
+  }
+
+  function switchToTap() {
+    beginGame('tap');
+  }
+
+  function cancelVoiceSetup() {
+    stopVoice();
+    setVoiceStatus('idle');
+    worldRef.current = null;
+    phaseRef.current = 'controls';
+    setPhase('controls');
   }
 
   const w = worldRef.current;
@@ -262,7 +412,11 @@ export default function DinoRun({ onHome }) {
   return (
     <div className="run-game">
       {w && (
-        <div className="run-tap" onPointerDown={jump} onClick={jump}>
+        <div
+          className={`run-tap ${controlMode === 'voice' ? 'voice-controlled' : ''}`}
+          onPointerDown={controlMode === 'tap' ? jump : undefined}
+          onClick={controlMode === 'tap' ? jump : undefined}
+        >
           {visDecor.map(d =>
             d.type === 'cloud' ? (
               <CloudSVG key={d.id} className="run-cloud" style={{ left: d.x - w.scroll, bottom: d.alt }} />
@@ -327,6 +481,28 @@ export default function DinoRun({ onHome }) {
         </div>
       )}
 
+      {phase === 'play' && !w.finished && controlMode === 'voice' && (
+        <div className={`run-voice-hud run-voice-${voiceStatus}`} aria-live="polite">
+          <span className="run-voice-mic" aria-hidden="true">🎙️</span>
+          <span className="run-voice-copy">
+            <strong>
+              {voiceStatus === 'heard' && 'Jump!'}
+              {(voiceStatus === 'starting' || voiceStatus === 'reconnecting') && 'Connecting…'}
+              {voiceStatus === 'listening' && 'Say “Jump!”'}
+              {voiceStatus === 'blocked' && 'Microphone blocked'}
+              {voiceStatus === 'no-mic' && 'No microphone found'}
+              {voiceStatus === 'unavailable' && 'Voice unavailable'}
+            </strong>
+            {(voiceStatus === 'blocked' || voiceStatus === 'no-mic' || voiceStatus === 'unavailable') && (
+              <span>Switch to tap to keep playing</span>
+            )}
+          </span>
+          {(voiceStatus === 'blocked' || voiceStatus === 'no-mic' || voiceStatus === 'unavailable') && (
+            <button className="run-voice-fallback" onClick={switchToTap}>Use Tap</button>
+          )}
+        </div>
+      )}
+
       {phase === 'select' && (
         <div className="run-overlay run-select">
           <h1 className="run-select-title">🏃 Choose your dino!</h1>
@@ -360,6 +536,67 @@ export default function DinoRun({ onHome }) {
             ))}
           </div>
           <button className="run-change-dino" onClick={() => setPhase('select')}>◀ Change dino</button>
+        </div>
+      )}
+
+      {phase === 'controls' && (
+        <div className="run-overlay run-controls">
+          <h1 className="run-select-title">How will you jump?</h1>
+          <p className="run-control-intro">Choose your controls before the run starts.</p>
+          <div className="run-control-list">
+            <button className="run-control-card run-control-tap" onClick={() => beginGame('tap')}>
+              <span className="run-control-icon" aria-hidden="true">👆</span>
+              <span className="run-control-text">
+                <strong>Tap to Jump</strong>
+                <span>Tap anywhere on the game</span>
+              </span>
+              <span className="card-go">▶</span>
+            </button>
+            <button
+              className="run-control-card run-control-voice"
+              onClick={() => beginGame('voice')}
+              disabled={!SpeechRecognition}
+            >
+              <span className="run-control-icon" aria-hidden="true">🎙️</span>
+              <span className="run-control-text">
+                <strong>Voice Command</strong>
+                <span>{SpeechRecognition ? 'Say “Jump” to leap' : 'Not supported in this browser'}</span>
+              </span>
+              <span className="card-go">▶</span>
+            </button>
+          </div>
+          <p className="run-voice-note">
+            {SpeechRecognition
+              ? 'Voice mode will ask for microphone permission.'
+              : 'Try a browser with speech recognition to use voice mode.'}
+          </p>
+          <button className="run-change-dino" onClick={() => setPhase('level')}>◀ Change level</button>
+        </div>
+      )}
+
+      {phase === 'voice-setup' && (
+        <div className="run-overlay run-voice-setup" aria-live="polite">
+          <div className={`run-setup-mic run-setup-${voiceStatus}`} aria-hidden="true">🎙️</div>
+          <h1 className="run-select-title">
+            {(voiceStatus === 'starting' || voiceStatus === 'reconnecting') && 'Getting voice ready…'}
+            {voiceStatus === 'blocked' && 'Microphone blocked'}
+            {voiceStatus === 'no-mic' && 'No microphone found'}
+            {voiceStatus === 'unavailable' && 'Voice unavailable'}
+          </h1>
+          <p className="run-setup-copy">
+            {(voiceStatus === 'starting' || voiceStatus === 'reconnecting')
+              && 'Allow microphone access when your browser asks. The race will wait for you.'}
+            {voiceStatus === 'blocked'
+              && 'Allow microphone access in your browser settings, or keep playing with tap controls.'}
+            {voiceStatus === 'no-mic'
+              && 'Connect a microphone, or keep playing with tap controls.'}
+            {voiceStatus === 'unavailable'
+              && 'This browser does not support speech recognition.'}
+          </p>
+          {(voiceStatus === 'blocked' || voiceStatus === 'no-mic' || voiceStatus === 'unavailable') && (
+            <button className="play-again run-use-tap" onClick={switchToTap}>👆 Use Tap Instead</button>
+          )}
+          <button className="run-change-dino" onClick={cancelVoiceSetup}>◀ Back to controls</button>
         </div>
       )}
 
