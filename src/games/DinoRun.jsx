@@ -4,9 +4,8 @@ import Pteranodon from '../dinos/Pteranodon';
 import HomeButton from '../components/HomeButton';
 import Confetti from '../components/Confetti';
 import { ensureAudio, playJump, playCoin, playBonk, playChirp, playVictory } from '../sounds';
+import { COIN_RADIUS, OB, makeLevel } from './runLevel';
 import './run.css';
-
-let uid = Math.floor(Math.random() * 1e9);
 
 const SPEED = 185;       // px/s world scroll
 const GRAVITY = 1750;    // px/s^2
@@ -14,14 +13,6 @@ const JUMP_V = 640;      // px/s -> ~115px jump height
 const DINO_X = 85;       // dino's fixed x on screen
 const GROUND_H = 92;
 const DINO_SIZE = 76;
-
-// Obstacle hitbox sizes
-const OB = {
-  rock:   { w: 40, h: 34 },
-  cactus: { w: 34, h: 48 },
-  roller: { w: 38, h: 38 },
-  flyer:  { w: 46, h: 34 },
-};
 
 function CoinSVG({ className, style }) {
   return (
@@ -96,57 +87,6 @@ function RollerSVG({ className }) {
       <circle cx="19" cy="19" r="4" fill="#5D4037" />
     </svg>
   );
-}
-
-function makeLevel(levelNum) {
-  const coins = [];
-  let x = 420;
-  while (x < 3050) {
-    if (Math.random() < 0.5) {
-      for (let i = 0; i < 3; i++) coins.push({ id: uid++, x: x + i * 46, y: 18, got: false });
-    } else {
-      coins.push({ id: uid++, x, y: 40, got: false });
-      coins.push({ id: uid++, x: x + 52, y: 94, got: false });
-      coins.push({ id: uid++, x: x + 104, y: 40, got: false });
-    }
-    x += 270 + Math.random() * 160;
-  }
-
-  const decor = [];
-  for (let d = 150; d < 3500; d += 260 + Math.random() * 240) {
-    decor.push({
-      id: uid++,
-      x: d,
-      type: Math.random() < 0.45 ? 'cloud' : 'bush',
-      alt: 380 + Math.random() * 180, // cloud height above the ground (world px)
-    });
-  }
-
-  const obstacles = [];
-  if (levelNum >= 2) {
-    let ox = 650;
-    let i = 0;
-    const gap = levelNum === 3 ? 560 : 400;
-    while (ox < 2950) {
-      obstacles.push({
-        id: uid++, x: ox, type: i % 2 ? 'cactus' : 'rock',
-        hit: false, phase: Math.random() * 6.28, ox, oy: 0,
-      });
-      i++;
-      ox += gap + Math.random() * 140;
-    }
-  }
-  if (levelNum >= 3) {
-    for (const [mx, mtype] of [[900, 'roller'], [1650, 'flyer'], [2300, 'roller'], [2850, 'flyer']]) {
-      obstacles.push({
-        id: uid++, x: mx, type: mtype,
-        hit: false, phase: Math.random() * 6.28,
-        ox: mx, oy: mtype === 'flyer' ? 44 : 0,
-      });
-    }
-  }
-
-  return { coins, decor, obstacles, flagX: 3400 };
 }
 
 function makeWorld(level) {
@@ -337,7 +277,11 @@ export default function DinoRun({ onHome }) {
             <div
               key={c.id}
               className="run-coin"
-              style={{ left: c.x - w.scroll - 16, bottom: GROUND_H + c.y - 16 }}
+              style={{
+                left: c.x - w.scroll - COIN_RADIUS,
+                bottom: GROUND_H + c.y - COIN_RADIUS,
+                '--coin-delay': `${c.phase}s`,
+              }}
             >
               <CoinSVG className="run-coin-svg" />
             </div>
