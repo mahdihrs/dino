@@ -628,7 +628,20 @@ html, body, #root {
   box-shadow: 0 3px 8px rgba(0, 0, 30, 0.3);
   backdrop-filter: blur(4px);
   touch-action: manipulation;
-  transition: transform 0.1s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.home-btn:hover {
+  background: rgba(10, 15, 60, 0.62);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 7px 16px rgba(0, 0, 30, 0.32);
+}
+
+.home-btn:focus-visible,
+.play-again:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgba(255, 235, 59, 0.95);
+  outline-offset: 3px;
 }
 
 .home-btn:active {
@@ -638,6 +651,11 @@ html, body, #root {
 .home-btn svg {
   width: 24px;
   height: 24px;
+  transition: transform 0.18s ease;
+}
+
+.home-btn:hover svg {
+  transform: scale(1.08);
 }
 
 /* Tablet / iPad */
@@ -690,7 +708,10 @@ html, body, #root {
   .game-background::before,
   .cloud,
   .bg-sun.visible,
-  .play-again {
+  .play-again,
+  .home-btn,
+  .home-btn svg {
     animation: none;
+    transition: none;
   }
 }

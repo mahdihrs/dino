@@ -68,9 +68,22 @@
   box-shadow:
     0 8px 20px rgba(0, 0, 30, 0.35),
     inset 0 2px 3px rgba(255, 255, 255, 0.25);
-  transition: transform 0.12s ease;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, filter 0.2s ease;
   touch-action: manipulation;
   animation: floatIn 0.5s ease-out both;
+}
+
+.game-card:hover {
+  transform: translateY(-5px) rotate(-0.5deg);
+  filter: saturate(1.08) brightness(1.04);
+  box-shadow:
+    0 13px 26px rgba(0, 0, 30, 0.38),
+    inset 0 2px 3px rgba(255, 255, 255, 0.3);
+}
+
+.game-card:hover .card-go {
+  transform: translateX(3px) scale(1.08);
+  background: rgba(255, 255, 255, 0.34);
 }
 
 .game-card:nth-child(2) { animation-delay: 0.1s; }
@@ -216,11 +229,22 @@
   justify-content: center;
   flex: 0 0 auto;
   padding-left: 3px;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 @keyframes floatIn {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card,
+  .home-title,
+  .home-subtitle,
+  .home-screen::before {
+    animation: none;
+    transition: none;
+  }
 }
 
 /* Tablet / iPad */

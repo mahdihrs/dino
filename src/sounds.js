@@ -24,12 +24,22 @@ function initSynths() {
 
 export async function ensureAudio() {
   if (!started) {
+    // Create the instruments before awaiting Tone.start(). Game handlers call
+    // this function without awaiting it, so the first tap should still sound.
+    initSynths();
     try {
       await Tone.start();
       started = true;
       initSynths();
     } catch { /* audio unavailable */ }
   }
+}
+
+export function playTap() {
+  try {
+    initSynths();
+    synth?.triggerAttackRelease('G5', '64n');
+  } catch {}
 }
 
 export function playWobble() {

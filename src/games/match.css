@@ -58,6 +58,11 @@
   font-family: inherit;
 }
 
+.mcard:hover:not(.matched) .mcard-back {
+  box-shadow: 0 8px 16px rgba(110, 60, 0, 0.24);
+  filter: brightness(1.08);
+}
+
 .mcard-inner {
   position: relative;
   width: 100%;
